@@ -19,7 +19,10 @@
     "autoload": {
         "psr-4": {
             "OkamiChen\\TmsConfig\\":"src/"
-        }
+        },
+        "files" :[
+            "src/helper.php"
+        ]
     },
     "extra": {
         "laravel": {
