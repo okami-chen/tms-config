@@ -16,13 +16,16 @@ use Symfony\Component\Yaml\Yaml;
  */
 class Config {
     
+    static $files = [];
+    
     /**
      * 
      * @param string $file
      * @param string $key
+     * @param string $default
      * @return array
      */
-    static public function load($file, $key=null){
+    static public function load($file, $key=null, $default=null){
 
         if(!file_exists($file)){
             return [];
@@ -32,9 +35,19 @@ class Config {
             return [];
         }
         
-        $config = Yaml::parseFile($file);
+        $cacheKey   = md5($file);
+        
+        if(isset(static::$files[$cacheKey])){
+            $config = static::$files[$cacheKey];
+        }else{
+            $config = Yaml::parseFile($file);
+            if(count($config)){
+                static::$files[$cacheKey] = $config;
+            }
+        }
+        
         if($key){
-            return array_get($config, $key);
+            return array_get($config, $key, $default);
         }
         return $config;
     }
@@ -42,11 +55,13 @@ class Config {
     /**
      * 
      * @param string $name
+     * @param string $key
+     * @param string $default
      * @return []
      */
-    static public function env($name){
+    static public function env($name, $key=null, $default=null){
         $path   = base_path('yaml') .'/'.env('APP_ENV').'/'. $name .'.yml';
-        return self::load($path);
+        return self::load($path, $key, $default);
     }
 
     /**
